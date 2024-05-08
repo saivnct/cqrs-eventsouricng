@@ -1,0 +1,120 @@
+CQRS:
+    - Command query responsibility segregation
+    - CQRS suggests that an application should be divided into a command and query part where commands alter the state of an object or entity while queries retrieves the state of an object or entity.
+
+
+Why CQRS:
+    - Data is often more frequently queried than altered or vice versa.
+    - By segregating commands and queries enables us to optimize each for high performance, read and write.
+    - Representations of data often differs substantially.
+    - Executing command and query operations on the same model can cause data contention.
+    - Segregating read and write concerns enables you to manage, read and write security separately.
+
+Event sourcing:
+    - Event sourcing defines an approach where all the changes that are made to an object or entity are stored as a sequence of immutable events to an event store, as opposed to just saving the current state of the object or entity.
+
+Why Event sourcing:
+    - The event store provides a complete log of every state change.
+    - The state of an object/aggregate can be recreated by replaying the event store.
+    - Improves write performance: All event types are simply appended to the event store. There're no update or delete operations.
+    - In the case of failure, the event store can be used to restore the read database.
+
+
+
+NOTE: The most important thing in CQRS and Event Sourcing is the difference in how data is stored in the write vs the read database.
+    - In the write database you want to store your records as a sequence of immutable events over time. In other words all the state changes.
+    - In the read database you will always just store the latest state of your object/entity.
+
+
+Command:
+    - A command describes an action that needs to be done.
+    - It also contains all the information that is required to perform the action.
+    - Commands are named with a verb in the imperative mood
+        ex: OpenAccountCommand, CloseAccountCommand, DepositFundsCommand, WithdrawFundsCommand, etc.
+
+Event:
+    - Events are objects that describe something that has occurred in the application.
+    - A typical source of events is the Aggregate. When something important has occurred within the Aggregate, it will raise an event.
+    - Events are always named in the past particle verb
+        ex: AccountOpenedEvent, AccountClosedEvent, FundsDepositedEvent, FundsWithdrawnEvent, etc.
+
+
+Aggregate:
+
+    - An aggregate is an entity or group of entities that is always kept in a consistent state.
+    - The aggregate root is the entity within the aggregate that is reponsible for maintaining the aggregate's consistent state.
+    => This make aggregate the primary building block for implementing a command model in any CQRS based application.
+
+
+    - What is the purpose of the Aggregate Root?
+        - the Aggregate Root maintains the list of uncommited changes in the form of events, that needs tobe applied to the Aggregate and persisted to the event store.
+        - the Aggregate Root is the entity within the aggregate that is responsible for keeping the aggregate in a consistent state.
+        - the Aggregate Root contains a method that can be invoked to commit the changes that have been applied to the Aggregate.
+        - the Aggregate Root manages which "Apply" method should be called based on the Event type
+
+    - The aggregate and the replaying of the aggregate is a core element of any CQRS and Event Sourcing based application.
+
+    NOTE:
+    - The command that "creates" an instance of the Aggregate should always be handled in the constructor of the Aggregate, since it will ensure that this command type is always handled when a new instance is created of the Aggregate from the relevent command handler method.
+    - All fields of a Command object should always be validated before the Aggregate raises an event, because a client might pass incorrect information which we do not want to affect the state of the Aggregate. Once an event has been raised it will be applied to the Aggregate and persisted to the event store.
+
+
+    - In DDD, The aggregate can be viewed as the domain entity on the write/command side of a CQRS and Event Sourcing based application or service, similar to the domain entity that you find on the read/query side.
+    - The design of the aggregate allow you to be able to use events to recreate (replay) the latest state of the aggregate (your write model/entity) so that you do not have to query the read database for the latest state, else the hard separation of commands and queries would be in vain.
+    - In this project example:
+        - The aggregate (AccountAggregate) can be viewed as the domain entity on the write/command side, whereas the BankAccount model (com.giangbb.microservices.query.domain.BankAccount) is the domain entity on the read/query side.
+        - Now, when you look at the AccoutAggregate, it is difficult to view it as a domain model/entity, because unlike the BankAccount entity, it is not a simple POJO that contains only state and no behavior.
+        - The important thing to understand here is that the fundamental differences in its structure is due to the fundamental difference in how the data is stored in the write database/event store vs. how it is stored in the read database.
+            - The read side is simple, one instance of the BankAccount entity represents one record in the read database.
+            - The write side is more complex, because there we store the data as a sequence of immutable events over time, in other words we store all state changes and we save these state changes in the form of events that are versioned.
+
+Event Store:
+    - An event store is a database that is used to store data as a sequence of immutable events over time.
+    - An event store is a key enabler of event sourcing
+
+
+    - Event store - Key considerrations:
+        - An Event store must be an append-only store, no update or delete operations are allowed!!!
+        - Each event that is saved should represent the version or state of an Aggregate at a specific point in time.
+        - Events should be stored in chronological order, and new events should be appended to the previous event.
+        - The state of the Aggregate can be reconstructed by replaying all the events that have been stored in the event store.
+        - The event store should implement optimistic concurrency control.
+
+
+
+    - Why do we have to enforce optimistic concurrency control?
+        - Event sourcing is based on building the state of an Aggregate based on the order of the sequence of events.
+        - For the state to be correct, it is important that the ordering of events is enforced by implementing event versioning
+        - Optimistic concurrency control is then used to ensure that only the expected event versions can alter the state of the aggregate at any given point in time.
+        - THis is especially important when 2 or more clients request are made at the same time to alter the state of the Aggregate.s
+
+
+
+Domain driven design (DDD):
+    - It is an approach to structure and model software in a way that it matches the business domain.
+    - It places the primary focus of a software project on the core area of the business, also known as the core domain
+    - It refers to problems as domains and aims to establish a common language to talk about those problems
+    - It also describes independent problem areas as "Bounded contexts".
+
+
+    - Bounded contexts:
+        - It's an independent problem area.
+        - Each bounded context describes a logical boundary within which a particular model is defined and applicable.
+        - Each bounded context correlates to a microservice, (ex: the bank account microservice.)
+
+
+
+
+
+1.Why do we need to replay events every time?
+    - Replaying events every time on the command side of a CQRS-based application is a necessary step to ensure consistency and prevent data inconsistencies. It is a common approach for event sourcing applications and is not specific to any particular use case.
+    - The reason we need to replay events every time is to ensure that the command being executed is consistent with the current state of the aggregate. When a new command is received, we need to validate it against the current state of the aggregate, which is reconstructed by replaying all the events in the log.
+    - While replaying events can be computationally expensive, there are strategies to optimize the process, such as using caching or snapshotting.
+
+
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+.DS_Store
+
+
+docker/zookeeper_data
+docker/kafka_data
+docker/mongo_data
+docker/mongo_config
+docker/mysql_data
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
