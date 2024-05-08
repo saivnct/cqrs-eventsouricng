@@ -1,0 +1,229 @@
+{
+	"info": {
+		"_postman_id": "913cbf96-93e4-4665-8186-26ab7738e47e",
+		"name": "CQRS-Event sourcing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3236950"
+	},
+	"item": [
+		{
+			"name": "cmd",
+			"item": [
+				{
+					"name": "OpenAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountHolder\": \"test\",\n    \"accountType\":\"SAVINGS\",\n    \"openingBalance\":10000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_cmd}}/api/v1/openBankAccount",
+							"host": [
+								"{{url_cmd}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"openBankAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DepositFunds",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\":1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_cmd}}/api/v1/depositFunds/4925f4c7-e4d7-4ba6-a7b0-a82acae0b537",
+							"host": [
+								"{{url_cmd}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"depositFunds",
+								"4925f4c7-e4d7-4ba6-a7b0-a82acae0b537"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "WithdrawFunds",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\":3000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_cmd}}/api/v1/withdrawFunds/4925f4c7-e4d7-4ba6-a7b0-a82acae0b537",
+							"host": [
+								"{{url_cmd}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"withdrawFunds",
+								"4925f4c7-e4d7-4ba6-a7b0-a82acae0b537"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CloseAccount",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url_cmd}}/api/v1/closeBankAccount/9429f9fc-f3e3-487e-817f-2495fce952d8",
+							"host": [
+								"{{url_cmd}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"closeBankAccount",
+								"9429f9fc-f3e3-487e-817f-2495fce952d8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RestoreReadDb",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url_cmd}}/api/v1/restoreReadDb",
+							"host": [
+								"{{url_cmd}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restoreReadDb"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "query",
+			"item": [
+				{
+					"name": "All Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_query}}/api/v1/bankAccountLookup/",
+							"host": [
+								"{{url_query}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bankAccountLookup",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Account by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_query}}/api/v1/bankAccountLookup/byId/4925f4c7-e4d7-4ba6-a7b0-a82acae0b537",
+							"host": [
+								"{{url_query}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bankAccountLookup",
+								"byId",
+								"4925f4c7-e4d7-4ba6-a7b0-a82acae0b537"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Account by Acc holder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_query}}/api/v1/bankAccountLookup/byHolder/test",
+							"host": [
+								"{{url_query}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bankAccountLookup",
+								"byHolder",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find by balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_query}}/api/v1/bankAccountLookup/withBalance/GREATER_THAN/20000",
+							"host": [
+								"{{url_query}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bankAccountLookup",
+								"withBalance",
+								"GREATER_THAN",
+								"20000"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
